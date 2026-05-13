@@ -8,18 +8,10 @@ from "./05-Storage.js";
 import { setMinDate }
 from "./06-utils.js";
 
-/*
-==========================
-TASK MANAGER
-==========================
-*/
+
 const taskManager = new TaskManager();
 
-/*
-==========================
-CHARGEMENT LOCALSTORAGE
-==========================
-*/
+
 const savedTasks = loadTasks();
 
 /*
@@ -64,14 +56,9 @@ INITIALISATION
 ==========================
 */
 ui.init();
-/*
-*/
 setMinDate();
-/*
-==========================
-AUTO SAVE
-==========================
-*/
+
+
 const originalRenderTasks =
     ui.renderTasks.bind(ui);
 

@@ -14,20 +14,19 @@
       <h1>Gestionnaire de Tâches</h1>
     </header>
 
-    <main>
+    <main class = "main-content">
       <!-- FORMULAIRE -->
       <section class="form-section">
         <h2 id ="form-title">Ajouter une tâche</h2>
 
         <form id="task-form" class="task-form">
-          <div class="form-group">
+        <div class="form-group">
             <label for="title">Titre</label>
             <input
               type="text"
               id="title"
               required
               minlength="3"
-              maxlength="50"
             />
           <small class="error-message" id="title-error"></small>
           </div>

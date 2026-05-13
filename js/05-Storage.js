@@ -1,5 +1,12 @@
 /*
 ==========================
+STORAGE KEY
+==========================
+*/
+const STORAGE_KEY = "tasks";
+
+/*
+==========================
 SAUVEGARDE
 ==========================
 */
@@ -8,7 +15,7 @@ export function saveTasks(tasks) {
     try {
 
         localStorage.setItem(
-            "tasks",
+            STORAGE_KEY,
             JSON.stringify(tasks)
         );
 
@@ -18,7 +25,6 @@ export function saveTasks(tasks) {
             "Erreur sauvegarde localStorage :",
             error
         );
-
     }
 }
 
@@ -32,7 +38,9 @@ export function loadTasks() {
     try {
 
         const data =
-            localStorage.getItem("tasks");
+            localStorage.getItem(
+                STORAGE_KEY
+            );
 
         return data
             ? JSON.parse(data)
@@ -56,5 +64,7 @@ SUPPRESSION
 */
 export function clearTasks() {
 
-    localStorage.removeItem("tasks");
+    localStorage.removeItem(
+        STORAGE_KEY
+    );
 }

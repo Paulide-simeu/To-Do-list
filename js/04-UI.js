@@ -1,427 +1,727 @@
+
 import { validateForm } from "./06-utils.js";
 
 export default class UI {
-  constructor(taskManager) {
-    // Gestionnaire de tâches
-    this.taskManager = taskManager;
 
-    // FORMULAIRE
-    this.taskForm = document.getElementById("task-form");
+    constructor(taskManager) {
 
-    //bouton submit
-    this.submitButton = this.taskForm.querySelector("button[type='submit']");
+        /*
+        ==========================
+        TASK MANAGER
+        ==========================
+        */
+        this.taskManager = taskManager;
 
-    //Reference
-    this.cancelEditButton = document.getElementById("cancel-edit-btn");
+        /*
+        ==========================
+        FORMULAIRE
+        ==========================
+        */
+        this.taskForm =
+            document.getElementById("task-form");
 
-    //Titre du formulaire
-    this.formTitle = document.getElementById("form-title");
+        this.submitButton =
+            this.taskForm.querySelector(
+                "button[type='submit']"
+            );
 
-    // LISTE
-    this.taskList = document.getElementById("task-list");
+        this.cancelEditButton =
+            document.getElementById(
+                "cancel-edit-btn"
+            );
 
-    // RECHERCHE
-    this.searchInput = document.getElementById("search");
+        this.formTitle =
+            document.getElementById(
+                "form-title"
+            );
 
-    // FILTRES
-    this.filterButtons = document.querySelectorAll(".filter-btn");
+        /*
+        ==========================
+        INPUTS
+        ==========================
+        */
+        this.titleInput =
+            document.getElementById("title");
 
-    // STATS
-    this.totalTasks = document.getElementById("total-tasks");
-    this.completedTasks = document.getElementById("completed-tasks");
-    this.pendingTasks = document.getElementById("pending-tasks");
+        this.descriptionInput =
+            document.getElementById(
+                "description"
+            );
 
-    // FILTRE ACTUEL
-    this.currentFilter = "all";
+        this.categoryInput =
+            document.getElementById(
+                "category"
+            );
 
-    // modifie
-    this.editingTaskId = "null";
-  }
+        this.priorityInput =
+            document.getElementById(
+                "priority"
+            );
 
-  /*
+        this.dueDateInput =
+            document.getElementById(
+                "dueDate"
+            );
+
+        /*
+        ==========================
+        LISTE
+        ==========================
+        */
+        this.taskList =
+            document.getElementById(
+                "task-list"
+            );
+
+        /*
+        ==========================
+        RECHERCHE
+        ==========================
+        */
+        this.searchInput =
+            document.getElementById(
+                "search"
+            );
+
+        /*
+        ==========================
+        FILTRES
+        ==========================
+        */
+        this.filterButtons =
+            document.querySelectorAll(
+                ".filter-btn"
+            );
+
+        /*
+        ==========================
+        STATS
+        ==========================
+        */
+        this.totalTasks =
+            document.getElementById(
+                "total-tasks"
+            );
+
+        this.completedTasks =
+            document.getElementById(
+                "completed-tasks"
+            );
+
+        this.pendingTasks =
+            document.getElementById(
+                "pending-tasks"
+            );
+
+        /*
+        ==========================
+        ÉTAT
+        ==========================
+        */
+        this.currentFilter = "all";
+
+        this.editingTaskId = null;
+    }
+
+    /*
     ==========================
     INITIALISATION
     ==========================
     */
-  init() {
-    /*
-==========================
-VALIDATION LIVE
-==========================
-*/
-    this.taskForm.addEventListener("input", () => this.validateTaskForm());
+    init() {
 
-    //Annulation édition
+        /*
+        VALIDATION LIVE
+        */
+        this.taskForm.addEventListener(
+            "input",
+            () => this.validateTaskForm()
+        );
 
-    this.cancelEditButton.addEventListener("click", () => this.resetFormUI());
+        /*
+        ANNULATION ÉDITION
+        */
+        this.cancelEditButton.addEventListener(
+            "click",
+            () => this.resetFormUI()
+        );
 
-    // Formulaire
-    this.taskForm.addEventListener("submit", (event) =>
-      this.handleAddTask(event),
-    );
+        /*
+        FORMULAIRE
+        */
+        this.taskForm.addEventListener(
+            "submit",
+            (event) =>
+                this.handleAddTask(event)
+        );
 
-    // Event delegation sur les tâches
-    this.taskList.addEventListener("click", (event) =>
-      this.handleTaskClick(event),
-    );
+        /*
+        EVENT DELEGATION
+        */
+        this.taskList.addEventListener(
+            "click",
+            (event) =>
+                this.handleTaskClick(event)
+        );
 
-    // Recherche
-    this.searchInput.addEventListener("input", (event) =>
-      this.handleSearch(event),
-    );
+        /*
+        RECHERCHE
+        */
+        this.searchInput.addEventListener(
+            "input",
+            (event) =>
+                this.handleSearch(event)
+        );
 
-    // Filtres
-    this.filterButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        this.currentFilter = button.dataset.filter;
+        /*
+        FILTRES
+        */
+        this.filterButtons.forEach(
+            (button) => {
 
-        this.updateActiveFilter();
+                button.addEventListener(
+                    "click",
+                    () => {
 
+                        this.currentFilter =
+                            button.dataset.filter;
+
+                        this.updateActiveFilter();
+
+                        this.renderTasks();
+                    }
+                );
+            }
+        );
+
+        /*
+        PREMIER RENDU
+        */
         this.renderTasks();
-      });
-    });
 
-    // Premier rendu
-    this.renderTasks();
-
-    // Stats
-    this.renderStats();
-  }
-
-  /*
-    ==========================
-    AJOUT TÂCHE
-    ==========================
-    */
-  handleAddTask(event) {
-    event.preventDefault();
-
-    // Récupération données
-    const taskData = {
-      title: document.getElementById("title").value,
-      description: document.getElementById("description").value,
-      category: document.getElementById("category").value,
-      priority: document.getElementById("priority").value,
-      dueDate: document.getElementById("dueDate").value,
-    };
-
-    // Ajout tâche
-    /*
-MODE ÉDITION
-*/
-    if (this.editingTaskId) {
-      this.taskManager.updateTask(this.editingTaskId, taskData);
-
-      this.editingTaskId = null;
-
-      this.submitButton.textContent = "Ajouter";
-    } else {
-      this.taskManager.addTask(taskData);
-    }
-
-    document.querySelectorAll("input, textarea").forEach((input) => {
-      input.classList.remove("input-success");
-    });
-
-    // Mise à jour UI
-    this.renderTasks();
-
-    this.renderStats();
-
-    // Reset formulaire
-    this.resetFormUI();
-  }
-
-  /*
-==========================
-VALIDATION FORMULAIRE
-==========================
-*/
-  validateTaskForm() {
-    const formData = {
-      title: document.getElementById("title").value,
-
-      description: document.getElementById("description").value,
-
-      dueDate: document.getElementById("dueDate").value,
-    };
-
-    const errors = validateForm(formData);
-
-    /*
-    RESET
-    */
-    document.querySelectorAll(".error-message").forEach((error) => {
-      error.textContent = "";
-    });
-
-    document.querySelectorAll("input, textarea").forEach((input) => {
-      input.classList.remove("input-error", "input-success");
-    });
-
-    /*
-    TITLE
-    */
-    const titleInput = document.getElementById("title");
-
-    const titleError = document.getElementById("title-error");
-
-    if (errors.title) {
-      titleInput.classList.add("input-error");
-
-      titleError.textContent = errors.title;
-    } else {
-      titleInput.classList.add("input-success");
+        this.renderStats();
     }
 
     /*
-    DESCRIPTION
-    */
-    const descriptionInput = document.getElementById("description");
-
-    const descriptionError = document.getElementById("description-error");
-
-    if (errors.description) {
-      descriptionInput.classList.add("input-error");
-
-      descriptionError.textContent = errors.description;
-    }
-
-    /*
-    BUTTON
-    */
-    this.submitButton.disabled = Object.keys(errors).length > 0;
-  }
-  /*
-==========================
-RESET FORM UI
-==========================
-*/
-  resetFormUI() {
-    /*
-    RESET FORMULAIRE
-    */
-    this.taskForm.reset();
-
-    /*
-    RESET ERREURS
-    */
-    document.querySelectorAll(".error-message").forEach((error) => {
-      error.textContent = "";
-    });
-
-    /*
-    RESET INPUTS
-    */
-    document.querySelectorAll("input, textarea").forEach((input) => {
-      input.classList.remove("input-error", "input-success");
-    });
-
-    // bouton change
-    this.formTitle.textContent = "Ajouter une tâche";
-
-    /*
-    RESET BUTTON
-    */
-    this.submitButton.textContent = "Ajouter";
-
-    this.submitButton.disabled = false;
-
-    /*
-REMOVE EDITING CLASS
-*/
-    document.querySelectorAll(".task").forEach((task) => {
-      task.classList.remove("editing");
-    });
-
-    /*
-    RESET EDIT MODE
-    */
-    this.editingTaskId = null;
-
-    //Recacher boutton  au reset
-
-    this.cancelEditButton.style.display = "none";
-  }
-
-  /*
-==========================
-START EDIT TASK
-==========================
-*/
-  startEditTask(taskId) {
-    const task = this.taskManager.getTaskById(taskId);
-
-    if (!task) return;
-    /*
-REMOVE OLD EDITING
-*/
-    document.querySelectorAll(".task").forEach((task) => {
-      task.classList.remove("editing");
-    });
-
-    /*
-    REMPLIR FORMULAIRE
-    */
-    document.getElementById("title").value = task.title;
-
-    document.getElementById("description").value = task.description;
-
-    document.getElementById("category").value = task.category;
-
-    document.getElementById("priority").value = task.priority;
-
-    document.getElementById("dueDate").value = task.dueDate;
-
-    /*
-ADD EDITING CLASS
-*/
-    const taskElement = document.querySelector(`.task[data-id="${taskId}"]`);
-
-    if (taskElement) {
-      taskElement.classList.add("editing");
-    }
-
-    /*
-    MODE ÉDITION
-    */
-    this.editingTaskId = taskId;
-
-    //Afficher boutton en mode edition
-
-    this.cancelEditButton.style.display = "inline-block";
-
-    //bordure formulaire change
-
-    this.formTitle.textContent = "Modifier une tâche";
-
-    /*
-    CHANGER TEXTE BOUTON
-    */
-    this.submitButton.textContent = "Modifier";
-
-    /*
-SCROLL FORM
-*/
-    this.taskForm.scrollIntoView({
-      behavior: "smooth",
-
-      block: "start",
-    });
-  }
-
-  /*
     ==========================
-    CLICS SUR TÂCHES
+    AJOUT / MODIFICATION
     ==========================
     */
-  handleTaskClick(event) {
-    // CARD
-    const taskElement = event.target.closest(".task");
+    handleAddTask(event) {
 
-    if (!taskElement) return;
+        event.preventDefault();
 
-    // ID
-    const taskId = Number(taskElement.dataset.id);
-
-    /*
-        CHECKBOX
+        /*
+        DONNÉES FORMULAIRE
         */
-    if (event.target.classList.contains("task-checkbox")) {
-      event.stopPropagation();
+        const taskData = {
 
-      this.taskManager.toggleTaskComplete(taskId);
+            title:
+                this.titleInput.value,
 
-      this.renderTasks();
+            description:
+                this.descriptionInput.value,
 
-      this.renderStats();
+            category:
+                this.categoryInput.value,
 
-      return;
-    }
-    /*
-EDIT
-*/
-    if (event.target.classList.contains("edit-btn")) {
-      event.stopPropagation();
+            priority:
+                this.priorityInput.value,
 
-      this.startEditTask(taskId);
+            dueDate:
+                this.dueDateInput.value
+        };
 
-      return;
-    }
-
-    /*
-        DELETE
+        /*
+        MODE ÉDITION
         */
-    if (event.target.classList.contains("delete-btn")) {
-      event.stopPropagation();
+        if (this.editingTaskId) {
 
-      this.taskManager.deleteTask(taskId);
+            this.taskManager.updateTask(
+                this.editingTaskId,
+                taskData
+            );
 
-      this.renderTasks();
+        } else {
 
-      this.renderStats();
+            this.taskManager.addTask(
+                taskData
+            );
+        }
 
-      return;
+        /*
+        MISE À JOUR UI
+        */
+        this.renderTasks();
+
+        this.renderStats();
+
+        /*
+        RESET
+        */
+        this.resetFormUI();
     }
 
     /*
+    ==========================
+    VALIDATION FORMULAIRE
+    ==========================
+    */
+    validateTaskForm() {
+
+        const formData = {
+
+            title:
+                this.titleInput.value,
+
+            description:
+                this.descriptionInput.value,
+
+            category:
+                this.categoryInput.value,
+
+            priority:
+                this.priorityInput.value,
+
+            dueDate:
+                this.dueDateInput.value
+        };
+
+        const errors =
+            validateForm(formData);
+
+        /*
+        RESET ERREURS
+        */
+        document
+            .querySelectorAll(
+                ".error-message"
+            )
+            .forEach((error) => {
+
+                error.textContent = "";
+            });
+
+        /*
+        RESET INPUTS
+        */
+        const inputs = [
+
+            this.titleInput,
+            this.descriptionInput,
+            this.categoryInput,
+            this.priorityInput,
+            this.dueDateInput
+        ];
+
+        inputs.forEach((input) => {
+
+            input.classList.remove(
+                "input-error",
+                "input-success"
+            );
+        });
+
+        /*
+        TITLE
+        */
+        const titleError =
+            document.getElementById(
+                "title-error"
+            );
+
+        if (errors.title) {
+
+            this.titleInput.classList.add(
+                "input-error"
+            );
+
+            titleError.textContent =
+                errors.title;
+
+        } else {
+
+            this.titleInput.classList.add(
+                "input-success"
+            );
+        }
+
+        /*
         DESCRIPTION
         */
-    taskElement.classList.toggle("open");
-  }
+        const descriptionError =
+            document.getElementById(
+                "description-error"
+            );
 
-  /*
+        if (errors.description) {
+
+            this.descriptionInput.classList.add(
+                "input-error"
+            );
+
+            descriptionError.textContent =
+                errors.description;
+        }
+
+        /*
+        BOUTON
+        */
+        this.submitButton.disabled =
+            Object.keys(errors).length > 0;
+    }
+
+    /*
+    ==========================
+    RESET FORM UI
+    ==========================
+    */
+    resetFormUI() {
+
+        /*
+        RESET FORMULAIRE
+        */
+        this.taskForm.reset();
+
+        /*
+        RESET ERREURS
+        */
+        document
+            .querySelectorAll(
+                ".error-message"
+            )
+            .forEach((error) => {
+
+                error.textContent = "";
+            });
+
+        /*
+        RESET INPUTS
+        */
+        const inputs = [
+
+            this.titleInput,
+            this.descriptionInput,
+            this.categoryInput,
+            this.priorityInput,
+            this.dueDateInput
+        ];
+
+        inputs.forEach((input) => {
+
+            input.classList.remove(
+                "input-error",
+                "input-success"
+            );
+        });
+
+        /*
+        RESET UI
+        */
+        this.formTitle.textContent =
+            "Ajouter une tâche";
+
+        this.submitButton.textContent =
+            "Ajouter";
+
+        this.submitButton.disabled =
+            false;
+
+        /*
+        REMOVE EDITING
+        */
+        document
+            .querySelectorAll(".task")
+            .forEach((task) => {
+
+                task.classList.remove(
+                    "editing"
+                );
+            });
+
+        /*
+        RESET MODE ÉDITION
+        */
+        this.editingTaskId = null;
+
+        /*
+        CACHER BOUTON ANNULATION
+        */
+        this.cancelEditButton.style.display =
+            "none";
+    }
+
+    /*
+    ==========================
+    START EDIT TASK
+    ==========================
+    */
+    startEditTask(taskId) {
+
+        const task =
+            this.taskManager.getTaskById(
+                taskId
+            );
+
+        if (!task) return;
+
+        /*
+        REMOVE OLD EDITING
+        */
+        document
+            .querySelectorAll(".task")
+            .forEach((task) => {
+
+                task.classList.remove(
+                    "editing"
+                );
+            });
+
+        /*
+        REMPLIR FORMULAIRE
+        */
+        this.titleInput.value =
+            task.title;
+
+        this.descriptionInput.value =
+            task.description;
+
+        this.categoryInput.value =
+            task.category;
+
+        this.priorityInput.value =
+            task.priority;
+
+        this.dueDateInput.value =
+            task.dueDate;
+
+        /*
+        AJOUT CLASSE EDITING
+        */
+        const taskElement =
+            document.querySelector(
+                `.task[data-id="${taskId}"]`
+            );
+
+        if (taskElement) {
+
+            taskElement.classList.add(
+                "editing"
+            );
+        }
+
+        /*
+        MODE ÉDITION
+        */
+        this.editingTaskId = taskId;
+
+        /*
+        UI ÉDITION
+        */
+        this.cancelEditButton.style.display =
+            "inline-block";
+
+        this.formTitle.textContent =
+            "Modifier une tâche";
+
+        this.submitButton.textContent =
+            "Modifier";
+
+        /*
+        SCROLL
+        */
+        this.taskForm.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start"
+        });
+    }
+
+    /*
+    ==========================
+    CLICS TÂCHES
+    ==========================
+    */
+    handleTaskClick(event) {
+
+        const taskElement =
+            event.target.closest(".task");
+
+        if (!taskElement) return;
+
+        const taskId =
+            Number(taskElement.dataset.id);
+
+        /*
+        CHECKBOX
+        */
+        if (
+            event.target.classList.contains(
+                "task-checkbox"
+            )
+        ) {
+
+            event.stopPropagation();
+
+            this.taskManager.toggleTaskComplete(
+                taskId
+            );
+
+            this.renderTasks();
+
+            this.renderStats();
+
+            return;
+        }
+
+        /*
+        EDIT
+        */
+        if (
+            event.target.classList.contains(
+                "edit-btn"
+            )
+        ) {
+
+            event.stopPropagation();
+
+            this.startEditTask(taskId);
+
+            return;
+        }
+
+        /*
+        DELETE
+        */
+        if (
+            event.target.classList.contains(
+                "delete-btn"
+            )
+        ) {
+
+            event.stopPropagation();
+
+            this.taskManager.deleteTask(
+                taskId
+            );
+
+            this.renderTasks();
+
+            this.renderStats();
+
+            return;
+        }
+
+        /*
+        DESCRIPTION
+        */
+        taskElement.classList.toggle(
+            "open"
+        );
+    }
+
+    /*
     ==========================
     RECHERCHE
     ==========================
     */
-  handleSearch(event) {
-    const query = event.target.value;
+    handleSearch(event) {
 
-    this.renderTasks(query);
-  }
+        const query =
+            event.target.value;
 
-  /*
+        this.renderTasks(query);
+    }
+
+    /*
     ==========================
     RENDU TÂCHES
     ==========================
     */
-  renderTasks(searchQuery = "") {
-    let tasks = this.taskManager.filterTasks(this.currentFilter);
+    renderTasks(searchQuery = "") {
 
-    // Recherche
-    if (searchQuery) {
-      tasks = tasks.filter((task) =>
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
+        let tasks =
+            this.taskManager.filterTasks(
+                this.currentFilter
+            );
 
-    // Reset HTML
-    this.taskList.innerHTML = "";
+        /*
+        RECHERCHE
+        */
+        if (searchQuery) {
 
-    // Génération HTML
-    tasks.forEach((task) => {
-      const taskElement = document.createElement("li");
+            tasks = tasks.filter(
+                (task) => {
 
-      taskElement.className = `task ${task.completed ? "completed" : ""}`;
+                    return (
+                        task.title
+                            .toLowerCase()
+                            .includes(
+                                searchQuery.toLowerCase()
+                            )
+                        ||
+                        task.description
+                            .toLowerCase()
+                            .includes(
+                                searchQuery.toLowerCase()
+                            )
+                    );
+                }
+            );
+        }
 
-      // OVERDUE
-      if (task.isOverdue()) {
-        taskElement.classList.add("overdue");
-      }
+        /*
+        RESET HTML
+        */
+        this.taskList.innerHTML = "";
 
-      // ID
-      taskElement.dataset.id = task.id;
+        /*
+        GÉNÉRATION HTML
+        */
+        tasks.forEach((task) => {
 
-      // HTML
-      taskElement.innerHTML = `
-            
+            const taskElement =
+                document.createElement("li");
+
+            taskElement.className =
+                `task ${
+                    task.completed
+                        ? "completed"
+                        : ""
+                }`;
+
+            /*
+            OVERDUE
+            */
+            if (task.isOverdue()) {
+
+                taskElement.classList.add(
+                    "overdue"
+                );
+            }
+
+            /*
+            ID
+            */
+            taskElement.dataset.id =
+                task.id;
+
+            /*
+            HTML
+            */
+            taskElement.innerHTML = `
+
                 <div class="task-main">
 
-                    <input 
+                    <input
                         type="checkbox"
                         class="task-checkbox"
-                        ${task.completed ? "checked" : ""}
+                        ${
+                            task.completed
+                                ? "checked"
+                                : ""
+                        }
                     >
 
                     <div class="task-content">
@@ -442,7 +742,10 @@ EDIT
                             </span>
 
                             <span class="task-date">
-                                ${task.dueDate || "Pas de date"}
+                                ${
+                                    task.dueDate
+                                    || "Pas de date"
+                                }
                             </span>
 
                         </div>
@@ -464,63 +767,86 @@ EDIT
                 </div>
 
                 <div class="task-description">
-                    ${task.description || "Aucune description"}
+                    ${
+                        task.description
+                        || "Aucune description"
+                    }
                 </div>
-
             `;
 
-      this.taskList.appendChild(taskElement);
-    });
-  }
+            this.taskList.appendChild(
+                taskElement
+            );
+        });
+    }
 
-  /*
+    /*
     ==========================
     STATS
     ==========================
     */
-  renderStats() {
-    const stats = this.taskManager.getStats();
+    renderStats() {
 
-    this.totalTasks.textContent = stats.total;
+        const stats =
+            this.taskManager.getStats();
 
-    this.completedTasks.textContent = stats.completed;
+        this.totalTasks.textContent =
+            stats.total;
 
-    this.pendingTasks.textContent = stats.pending;
-  }
+        this.completedTasks.textContent =
+            stats.completed;
 
-  /*
+        this.pendingTasks.textContent =
+            stats.pending;
+    }
+
+    /*
     ==========================
     FILTRE ACTIF
     ==========================
     */
-  updateActiveFilter() {
-    this.filterButtons.forEach((button) => {
-      button.classList.remove("active");
+    updateActiveFilter() {
 
-      if (button.dataset.filter === this.currentFilter) {
-        button.classList.add("active");
-      }
-    });
-  }
+        this.filterButtons.forEach(
+            (button) => {
 
-  /*
+                button.classList.remove(
+                    "active"
+                );
+
+                if (
+                    button.dataset.filter
+                    === this.currentFilter
+                ) {
+
+                    button.classList.add(
+                        "active"
+                    );
+                }
+            }
+        );
+    }
+
+    /*
     ==========================
     ICÔNES PRIORITÉ
     ==========================
     */
-  getPriorityIcon(priority) {
-    switch (priority) {
-      case "low":
-        return "○";
+    getPriorityIcon(priority) {
 
-      case "medium":
-        return "▰";
+        switch (priority) {
 
-      case "high":
-        return "▲";
+            case "low":
+                return "○";
 
-      default:
-        return "";
+            case "medium":
+                return "▰";
+
+            case "high":
+                return "▲";
+
+            default:
+                return "";
+        }
     }
-  }
 }

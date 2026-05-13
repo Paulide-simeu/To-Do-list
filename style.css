@@ -53,7 +53,22 @@ section {
 .form-row {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
+  flex: 1;
+}
+
+.form-actions{
+  display: flex;
+  align-items: flex-end;
+  flex: 3;
+  gap: 16px;
+  justify-content: center;
+}
+
+.submit-btn{
+  width: 100%;
+  height: 42px;
+  margin-top: 2%;
 }
 
 /* INPUTS */
@@ -68,9 +83,10 @@ select {
 /* BUTTON */
 button {
   border: none;
-  border-radius: 6px;
-  padding: 10px;
+  border: 1px;
+  padding: 12px;
   cursor: pointer;
+  
 }
 
 .btn-primary {
@@ -81,7 +97,7 @@ button {
 /* cancel button*/
 
 .cancel-btn {
-  display: none;
+  display: inline-block;
   background-color: #EF4444;
 }
 
@@ -92,14 +108,16 @@ button {
 /* FILTERS */
 .filters {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: nowrap;
 }
 
 .filter-btn {
   background: #e2e8f0;
   border-radius: 20px;
   padding: 6px 12px;
+  
 }
 
 .filter-btn.active {
@@ -116,6 +134,12 @@ button {
   cursor: pointer;
 }
 
+ul{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 .task:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
@@ -125,7 +149,10 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+  
 }
+
+
 
 .task-content {
   flex: 1;
@@ -211,6 +238,11 @@ button {
   text-decoration: line-through;
 }
 
+.task-title{
+  word-break: break-word;
+}
+
+
 /*Message Erreur*/
 .error-message {
   color: #Ef4444;
@@ -234,6 +266,66 @@ button:disabled{
   cursor: not-allowed;
 }
 
+.main-content{
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+
+
+
+/* Le conteneur principal des stats */
+.stats {
+    display: flex;               /* Aligne les éléments côte à côte */
+    justify-content: space-around; /* Répartit l'espace uniformément */
+    align-items: center;
+    background-color: #f9f9f9;  /* Un fond léger pour faire ressortir la zone */
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: center;         /* Centre le texte à l'intérieur */
+}
+
+/* Chaque bloc de statistique individuel */
+.stat {
+    display: flex;
+    flex-direction: column;      /* Met le chiffre au-dessus du texte */
+    gap: 5px;                    /* Petit espace entre le chiffre et le texte */
+}
+
+/* Le chiffre (span) */
+.stat span {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;              /* Une couleur bleue pour les chiffres */
+}
+
+/* Le label (p) */
+.stat p {
+    margin: 0;                   /* Enlève les marges par défaut des paragraphes */
+    font-size: 0.9rem;
+    color: #555;
+    text-transform: uppercase;   /* Optionnel : met en majuscules pour le style */
+}
+
+/* Adaptation pour les tout petits écrans (iPhone SE) */
+@media (max-width: 375px) {
+    .stats {
+        padding: 10px;
+    }
+    .stat span {
+        font-size: 1.2rem;
+    }
+    .stat p {
+        font-size: 0.75rem;
+    }
+}
+
+
+
 @media (min-width: 768px) {
     .form-row {
         flex-direction: row;
@@ -244,12 +336,38 @@ button:disabled{
         justify-content: space-between;
     }
 }
-@media (max-width: 768px) {
 
-    .task-actions {
+@media (max-width: 480px){
+  .filters{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .submit-btn,
+  .cancel-btn{
+    width: 100%;
+  }
 
-        opacity: 1;
+  .form-actions{
+    display: flex;
+    flex-direction: column;
+    gap : 10px;
+  }
+}
 
+@media (max-width : 960px){
+    .form-row{
+      
+      flex-direction: column;
+    
+    }
+    .form-group,.form-actions{
+      width: 100%;
     }
 
+    .submit-btn,
+    .cancel-btn{
+      width: 100%;
+    }
 }

@@ -17,28 +17,6 @@ export function setMinDate() {
 
 /*
 ==========================
-VALIDATION TITRE
-==========================
-*/
-export function validateTitle(title) {
-
-    return (
-        title.length >= 3 &&
-        title.length <= 50
-    );
-}
-
-/*
-==========================
-VALIDATION DESCRIPTION
-==========================
-*/
-export function validateDescription(description) {
-
-    return description.length <= 200;
-}
-/*
-==========================
 VALIDATION FORMULAIRE
 ==========================
 */
@@ -58,15 +36,43 @@ export function validateForm(data) {
             "Minimum 3 caractères";
     }
 
+    if (
+        data.title &&
+        data.title.trim().length > 50
+    ) {
+
+        errors.title =
+            "Maximum 50 caractères";
+    }
+
     /*
     DESCRIPTION
     */
     if (
+        data.description &&
         data.description.length > 200
     ) {
 
         errors.description =
             "Maximum 200 caractères";
+    }
+
+    /*
+    CATEGORY
+    */
+    if (!data.category) {
+
+        errors.category =
+            "Catégorie obligatoire";
+    }
+
+    /*
+    PRIORITY
+    */
+    if (!data.priority) {
+
+        errors.priority =
+            "Priorité obligatoire";
     }
 
     /*
@@ -77,9 +83,10 @@ export function validateForm(data) {
         const selectedDate =
             new Date(data.dueDate);
 
-        const today = new Date();
+        const today =
+            new Date();
 
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
 
         if (selectedDate < today) {
 
